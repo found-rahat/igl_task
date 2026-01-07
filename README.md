@@ -1,66 +1,197 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Candidate Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive Laravel application for managing job candidate applications with Excel import functionality and role-based access control.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Excel File Processing**: Import candidate data from Excel files
+- **Role-Based Access Control**: Admin, Staff, and Candidate roles
+- **Candidate Management**: Full CRUD operations for candidates
+- **Interview Scheduling**: Schedule and manage interviews
+- **Status Tracking**: Track candidate status (pending, hired, rejected, etc.)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+
+- MySQL
+- Composer
+- Node.js and npm
 
-## Learning Laravel
+## Installation
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd candidate-management-system
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+2. Install PHP dependencies:
+```bash
+composer install
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+3. Install Node.js dependencies:
+```bash
+npm install
+```
 
-## Laravel Sponsors
+4. Create a MySQL database and update `.env`:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=candidate_management
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+5. Generate application key:
+```bash
+php artisan key:generate
+```
 
-### Premium Partners
+6. Run migrations:
+```bash
+php artisan migrate
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+7. Build assets:
+```bash
+npm run build
+```
 
-## Contributing
+8. Start the development server:
+```bash
+php artisan serve
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Default Users
 
-## Code of Conduct
+The system comes with three default users:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- **Admin**: admin@example.com / password
+- **Staff**: staff@example.com / password
+- **Candidate**: candidate@example.com / password
 
-## Security Vulnerabilities
+## Excel File Format
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+The Excel file should have the following columns in order:
+
+| Column | Field | Description |
+|--------|-------|-------------|
+| A | Name | Candidate's full name |
+| B | Email | Candidate's email address |
+| C | Phone | Candidate's phone number |
+| D | Experience Years | Number of years of experience |
+| E | Institute | Previous workplace/Institute |
+| F | Position | Position held at the institute |
+| G | Age | Candidate's age |
+
+Example:
+```
+Name,Email,Phone,Experience Years,Institute,Position,Age
+John Doe,john.doe@email.com,+1234567890,5,ABC University,Software Engineer,30
+```
+
+## Usage
+
+1. **Login**: Access the application and login with your credentials
+2. **Import Candidates**: Use the "Import from Excel" feature to add candidates
+3. **Manage Candidates**: View, edit, or delete candidate records
+4. **Schedule Interviews**: Select candidates and schedule interviews
+5. **Track Status**: Monitor candidate progress through the hiring process
+
+## Role Permissions
+
+- **Admin**: Full access to all features
+- **Staff**: Can upload Excel files and view candidates
+- **Candidate**: Can view their own status
+
+## Folder Structure
+
+```
+app/
+├── Http/
+│   └── Controllers/
+│       ├── Auth/
+│       │   └── LoginController.php
+│       └── CandidateController.php
+├── Models/
+│   ├── User.php
+│   └── Candidate.php
+config/
+├── database.php
+database/
+├── migrations/
+│   └── create_candidates_table.php
+├── seeders/
+│   └── UserSeeder.php
+resources/
+├── views/
+│   ├── layouts/
+│   │   └── app.blade.php
+│   ├── auth/
+│   │   └── login.blade.php
+│   ├── admin/
+│   │   └── dashboard.blade.php
+│   ├── staff/
+│   │   └── dashboard.blade.php
+│   ├── candidate/
+│   │   └── dashboard.blade.php
+│   └── candidates/
+│       ├── index.blade.php
+│       ├── show.blade.php
+│       ├── edit.blade.php
+│       ├── import.blade.php
+│       ├── upcoming.blade.php
+│       ├── completed.blade.php
+│       ├── hired.blade.php
+│       └── rejected.blade.php
+routes/
+└── web.php
+```
+
+## API Endpoints
+
+- `GET /login` - Login page
+- `POST /login` - Login authentication
+- `POST /logout` - Logout
+- `GET /dashboard` - Dashboard redirect
+- `GET /admin/dashboard` - Admin dashboard
+- `GET /staff/dashboard` - Staff dashboard
+- `GET /candidate/dashboard` - Candidate dashboard
+- `GET /candidates` - All candidates
+- `GET /candidates/create` - Create candidate form
+- `POST /candidates` - Create candidate
+- `GET /candidates/{id}` - View candidate
+- `GET /candidates/{id}/edit` - Edit candidate form
+- `PUT /candidates/{id}` - Update candidate
+- `DELETE /candidates/{id}` - Delete candidate
+- `GET /candidates/import/form` - Import form
+- `POST /candidates/import` - Import candidates
+- `GET /candidates/hired` - Hired candidates
+- `GET /candidates/rejected` - Rejected candidates
+- `GET /candidates/schedule/interview/form` - Schedule interview form
+- `POST /candidates/schedule/interview` - Schedule interviews
+- `GET /candidates/upcoming-interviews` - Upcoming interviews
+- `GET /candidates/completed-interviews` - Completed interviews
+- `GET /candidates/download/phones` - Download phone numbers
+
+## Security
+
+- Passwords are hashed using Laravel's default hashing algorithm
+- CSRF protection is enabled
+- Input validation is implemented for all forms
+- Role-based access control prevents unauthorized access
+
+## Technologies Used
+
+- Laravel 11
+- MySQL
+- Tailwind CSS
+- PhpSpreadsheet
+- Vite
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open source and available under the MIT License.
