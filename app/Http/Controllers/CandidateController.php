@@ -302,7 +302,6 @@ class CandidateController extends Controller
         \Log::info('upcomingInterviews method called');
         try {
             $candidates = Candidate::whereIn('status', ['interview_scheduled', 'second_interview_scheduled'])
-                ->where('interview_date', '>=', now())
                 ->orderBy('interview_date', 'asc')
                 ->get();
             \Log::info('Candidates retrieved: ' . $candidates->count());
@@ -319,7 +318,6 @@ class CandidateController extends Controller
         \Log::info('secondInterviews method called');
         try {
             $candidates = Candidate::where('status', 'second_interview_scheduled')
-                ->where('interview_date', '>=', now())
                 ->orderBy('interview_date', 'asc')
                 ->get();
             \Log::info('Second interview candidates retrieved: ' . $candidates->count());
@@ -335,18 +333,17 @@ class CandidateController extends Controller
     {
         \Log::info('completedInterviews method called');
         try {
-            // Update status for past interviews (including second interviews)
-            Candidate::whereIn('status', ['interview_scheduled', 'second_interview_scheduled'])
-                ->where('interview_date', '<', now())
-                ->update(['status' => 'interview_completed']);
-
             // Get candidates who have completed interviews OR had interviews in the past
-            $candidates = Candidate::where('status', 'interview_completed')
-                ->orWhere(function($query) {
-                    $query->whereIn('status', ['interview_scheduled', 'second_interview_scheduled'])
-                          ->where('interview_date', '<', now());
-                })
-                ->get();
+            // Also include candidates with 'passed' status as they are part of the completed interview flow
+            $candidates = Candidate::where(function($query) {
+                $query->where('status', 'interview_completed')
+                      ->orWhere('status', 'passed')
+                      ->orWhere('status', 'failed')
+                      ->orWhere(function($subQuery) {
+                          $subQuery->whereIn('status', ['interview_scheduled', 'second_interview_scheduled']);
+                      });
+            })
+            ->get();
 
             \Log::info('Completed candidates retrieved: ' . $candidates->count());
             return view('candidates.completed', compact('candidates'));

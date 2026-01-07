@@ -81,9 +81,9 @@
                                             onmouseover="this.style.backgroundColor='#f3f4f6'"
                                             onmouseout="this.style.backgroundColor='transparent'">Edit</a>
                                         <!-- Status Update Form -->
-                                        <form method="POST" action="{{ route('candidates.mark.status', $candidate->id) }}" class="block" style="margin: 0;">
+                                        <form method="POST" action="{{ route('candidates.mark.status', $candidate->id) }}" class="block" style="margin: 0;" id="status-form-{{ $candidate->id }}">
                                             @csrf
-                                            <select name="status" class="w-full text-sm border-0 rounded-none" style="padding: 0.5rem 1rem; background: none; cursor: pointer;" onchange="this.form.submit()">
+                                            <select name="status" class="w-full text-sm border-0 rounded-none" style="padding: 0.5rem 1rem; background: none; cursor: pointer;" onchange="document.getElementById('status-form-{{ $candidate->id }}').submit();">
                                                 <option value="" disabled selected>Update Status</option>
                                                 <option value="pending" {{ $candidate->status !== 'pending' ? '' : 'disabled' }}>Pending</option>
                                                 <option value="hired" {{ $candidate->status !== 'hired' ? '' : 'disabled' }}>Hired</option>

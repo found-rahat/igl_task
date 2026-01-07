@@ -48,20 +48,20 @@
                                             onmouseover="this.style.backgroundColor='#f3f4f6'"
                                             onmouseout="this.style.backgroundColor='transparent'">Edit</a>
                                         <form action="{{ route('candidates.mark.status', $candidate->id) }}" method="POST"
-                                            style="margin:0;">
+                                            style="margin:0;" id="status-form-{{ $candidate->id }}">
                                             @csrf
                                             <select name="status"
                                                 style="width:100%; border:none; font-size:0.875rem; padding:0.5rem 1rem;"
-                                                onchange="this.form.submit()">
+                                                onchange="document.getElementById('status-form-{{ $candidate->id }}').submit();">
                                                 <option value="" disabled selected>Update Status</option>
-                                                <option value="pending">Pending</option>
-                                                <option value="hired">Hired</option>
-                                                <option value="rejected">Rejected</option>
-                                                <option value="interview_scheduled">Interview Scheduled</option>
-                                                <option value="interview_completed">Interview Completed</option>
-                                                <option value="passed">Passed</option>
-                                                <option value="failed">Failed</option>
-                                                <option value="second_interview_scheduled">Second Interview Scheduled
+                                                <option value="pending" {{ $candidate->status !== 'pending' ? '' : 'disabled' }}>Pending</option>
+                                                <option value="hired" {{ $candidate->status !== 'hired' ? '' : 'disabled' }}>Hired</option>
+                                                <option value="rejected" {{ $candidate->status !== 'rejected' ? '' : 'disabled' }}>Rejected</option>
+                                                <option value="interview_scheduled" {{ $candidate->status !== 'interview_scheduled' ? '' : 'disabled' }}>Interview Scheduled</option>
+                                                <option value="interview_completed" {{ $candidate->status !== 'interview_completed' ? '' : 'disabled' }}>Interview Completed</option>
+                                                <option value="passed" {{ $candidate->status !== 'passed' ? '' : 'disabled' }}>Passed</option>
+                                                <option value="failed" {{ $candidate->status !== 'failed' ? '' : 'disabled' }}>Failed</option>
+                                                <option value="second_interview_scheduled" {{ $candidate->status !== 'second_interview_scheduled' ? '' : 'disabled' }}>Second Interview Scheduled
                                                 </option>
                                             </select>
                                         </form>
