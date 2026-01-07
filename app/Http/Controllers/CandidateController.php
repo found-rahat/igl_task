@@ -10,9 +10,16 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class CandidateController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $candidates = Candidate::all();
+        $query = Candidate::query();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $candidates = $query->latest()->paginate(10)->withQueryString();
+
         return view('candidates.index', compact('candidates'));
     }
 
@@ -118,200 +125,112 @@ class CandidateController extends Controller
 
     public function import(Request $request)
     {
-        \Log::info('Starting Excel import process');
-
         $request->validate([
             'excel_file' => 'required|file|mimes:xlsx,xls,csv'
         ]);
 
-        \Log::info('File validation passed, getting file: ' . $request->file('excel_file')->getClientOriginalName());
-
-        $file = $request->file('excel_file');
-        \Log::info('File path: ' . $file->getPathname());
-
         try {
+            $file = $request->file('excel_file');
             $spreadsheet = IOFactory::load($file->getPathname());
-            $worksheet = $spreadsheet->getActiveSheet();
-            $rows = $worksheet->toArray();
+            $rows = $spreadsheet->getActiveSheet()->toArray();
 
-            \Log::info('Excel file loaded successfully, total rows: ' . count($rows));
-
-            // Skip the header row
+            // Remove header
             array_shift($rows);
 
             $processedCount = 0;
             $skippedCount = 0;
 
             foreach ($rows as $index => $row) {
-                \Log::info('Processing row ' . ($index + 1) . ': ' . json_encode($row));
 
-                // Check if we have enough columns in the row
-                if (isset($row[2]) && !empty(trim($row[2]))) { // Career Summary column (Column C)
-                    \Log::info('Row has valid Career Summary data');
+                /*
+                * Column mapping
+                * 0 => SL
+                * 1 => Image
+                * 2 => Profile Info (Name, Age, Phone, Email)
+                * 3 => Career Summary (Company : Position)
+                * 4 => Experience & Status
+                */
 
-                    // The Career Summary is in index 2
-                    $careerSummary = isset($row[2]) ? trim($row[2]) : '';
-
-                // Extract name using regex
-                preg_match('/Name:\s*([^\n\r]+)/', $careerSummary, $nameMatches);
-                $name = isset($nameMatches[1]) ? trim($nameMatches[1]) : '';
-
-                // Extract age using regex
-                preg_match('/Age:\s*([\d.]+)/', $careerSummary, $ageMatches);
-                $age = isset($ageMatches[1]) ? (int)$ageMatches[1] : 0;
-
-                // Extract email using regex (improved pattern to handle various formats)
-                preg_match('/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/', $careerSummary, $emailMatches);
-                $email = isset($emailMatches[1]) ? trim($emailMatches[1]) : '';
-
-                // Extract phone using regex (handles various formats like 1 312-555-4567, +1 312-555-4567, etc.)
-                preg_match('/(\+?\d{1,3}[\s-]?\d{3}[\s-]?\d{3}[\s-]?\d{4}|[\d\s-]{10,15})/', $careerSummary, $phoneMatches);
-                $phone = isset($phoneMatches[1]) ? trim($phoneMatches[1]) : '';
-
-                // Clean up the phone number format
-                $phone = preg_replace('/\s+/', ' ', $phone); // Replace multiple spaces with single space
-                $phone = trim($phone);
-
-                // If phone starts with a digit but doesn't have a country code, add +1 as default for US numbers
-                if (!empty($phone) && preg_match('/^\d/', $phone) && !preg_match('/^\+/', $phone)) {
-                    $digitsOnly = preg_replace('/[^0-9]/', '', $phone);
-                    if (strlen($digitsOnly) == 10) {
-                        $phone = '+1 ' . implode('-', [
-                            substr($digitsOnly, 0, 3),
-                            substr($digitsOnly, 3, 3),
-                            substr($digitsOnly, 6, 4)
-                        ]);
-                    } elseif (strlen($digitsOnly) == 11 && substr($digitsOnly, 0, 1) == '1') {
-                        $phone = '+1 ' . implode('-', [
-                            substr($digitsOnly, 1, 3),
-                            substr($digitsOnly, 4, 3),
-                            substr($digitsOnly, 7, 4)
-                        ]);
-                    }
+                if (empty(trim($row[2] ?? ''))) {
+                    $skippedCount++;
+                    continue;
                 }
 
-                // Extract total experience years from Experience And Application Status column (index 3)
-                $experienceSection = isset($row[4]) ? trim($row[4]) : '';
+                $profileInfo   = trim($row[2]);
+                $careerSummary = trim($row[3] ?? '');
+                $experienceRaw = trim($row[4] ?? '');
 
-                // Clean up the experience section to normalize whitespace and line breaks
-                $experienceSection = preg_replace('/\s+/', ' ', $experienceSection); // Replace all whitespace sequences with single space
-                $experienceSection = trim($experienceSection);
+                /* ---------------- BASIC INFO ---------------- */
 
-                // Extract total experience years (more flexible pattern to handle various formats)
+                preg_match('/Name:\s*([^\n\r]+)/i', $profileInfo, $m);
+                $name = $m[1] ?? null;
+
+                preg_match('/Age:\s*(\d+)/i', $profileInfo, $m);
+                $age = isset($m[1]) ? (int) $m[1] : null;
+
+                preg_match('/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i', $profileInfo, $m);
+                $email = $m[0] ?? null;
+
+                preg_match('/(\+?\d[\d\s\-]{9,15})/', $profileInfo, $m);
+                $phone = isset($m[1]) ? trim(preg_replace('/\s+/', ' ', $m[1])) : null;
+
+                /* ---------------- EXPERIENCE YEARS ---------------- */
+
                 $experience_years = 0;
-
-                // Debug: Log the actual content being processed
-                \Log::info('Processing experience section: ' . $experienceSection);
-
-                // Try multiple patterns to extract experience years
-                if (preg_match('/Total Experience:\s*(\d+)\+?\s*Year[s]?/i', $experienceSection, $expMatches)) {
-                    $experience_years = (int)$expMatches[1];
-                    \Log::info('Matched pattern 1: ' . $expMatches[0] . ' -> ' . $experience_years);
-                } elseif (preg_match('/Total Experience:\s*(\d+(?:\.\d+)?)\+?\s*Year[s]?/i', $experienceSection, $expMatches)) {
-                    $experience_years = (int)$expMatches[1];
-                    \Log::info('Matched pattern 2: ' . $expMatches[0] . ' -> ' . $experience_years);
-                } elseif (preg_match('/Total Experience:\s*(\d+)/i', $experienceSection, $expMatches)) {
-                    $experience_years = (int)$expMatches[1];
-                    \Log::info('Matched pattern 3: ' . $expMatches[0] . ' -> ' . $experience_years);
-                } elseif (preg_match('/Experience:\s*(\d+)/i', $experienceSection, $expMatches)) {
-                    $experience_years = (int)$expMatches[1];
-                    \Log::info('Matched pattern 4: ' . $expMatches[0] . ' -> ' . $experience_years);
-                } else {
-                    \Log::info('No pattern matched for experience section: ' . $experienceSection);
+                if (preg_match('/Total Experience:\s*(\d+)/i', $experienceRaw, $m)) {
+                    $experience_years = (int) $m[1];
                 }
 
-                // Extract previous experience details from Career Summary (index 2)
-                $careerSummaryForExperience = $careerSummary; // This is already index 2
+                /* ---------------- PREVIOUS EXPERIENCE ---------------- */
 
-                // Clean up the career summary to normalize whitespace and line breaks
-                $careerSummaryForExperience = preg_replace('/\s+/', ' ', $careerSummaryForExperience); // Replace all whitespace sequences with single space
-                $careerSummaryForExperience = trim($careerSummaryForExperience);
-
-                // Extract previous experience details from Career Summary
                 $previousExperience = [];
+                if (!empty($careerSummary)) {
+                    preg_match_all(
+                        '/([^:\n]+)\s*:\s*([^(,\n]+)/',
+                        $careerSummary,
+                        $matches,
+                        PREG_SET_ORDER
+                    );
 
-                // Look for company and position pairs in the career summary (enhanced pattern to handle special characters)
-                $pattern = '/([A-Za-z\s&.`\'\-]+(?:Solutions|Innovations|Technologies|Systems|IT|Lab|Pte\. Ltd|Ltd|LLC|Inc|Corp|Group|Alpha|Edutech|limited|BD|Consultancy|enterprise)[^:]*)\s*:\s*([^(]+)/';
-                preg_match_all($pattern, $careerSummaryForExperience, $companyMatches, PREG_SET_ORDER);
-
-                foreach ($companyMatches as $match) {
-                    $company = trim($match[1]);
-                    $position = trim($match[2]);
-                    // Clean up the position to remove extra details
-                    $position = preg_replace('/\s*\([^)]+\)/', '', $position); // Remove anything in parentheses
-                    $position = trim($position);
-                    if (!empty($company) && !empty($position)) {
-                        $previousExperience[$company] = $position;
-                    }
-                }
-
-                // If no companies were matched, try a more general pattern to catch remaining entries
-                if (empty($previousExperience)) {
-                    // General pattern to match "Company Name: Position" format anywhere in the text
-                    $generalPattern = '/([A-Za-z\s&.`\'\-]+[A-Za-z][^:\n]*?)\s*:\s*([^(]+)/';
-                    preg_match_all($generalPattern, $careerSummaryForExperience, $generalMatches, PREG_SET_ORDER);
-
-                    foreach ($generalMatches as $match) {
+                    foreach ($matches as $match) {
                         $company = trim($match[1]);
                         $position = trim($match[2]);
-                        // Clean up the position to remove extra details
-                        $position = preg_replace('/\s*\([^)]+\)/', '', $position); // Remove anything in parentheses
-                        $position = trim($position);
-                        if (!empty($company) && !empty($position)) {
+
+                        if ($company && $position) {
                             $previousExperience[$company] = $position;
                         }
                     }
                 }
 
-                // If still no experience years found, try to extract from the career summary as backup
-                if ($experience_years == 0) {
-                    \Log::info('Trying to extract experience from career summary as backup');
-                    if (preg_match('/Total Experience:\s*(\d+)\+?\s*Year[s]?/i', $careerSummary, $expMatches)) {
-                        $experience_years = (int)$expMatches[1];
-                        \Log::info('Found experience in career summary: ' . $experience_years);
-                    }
+                /* ---------------- SAVE ---------------- */
+
+                if (!$email || Candidate::where('email', $email)->exists()) {
+                    $skippedCount++;
+                    continue;
                 }
 
-                // Create candidate data
-                $candidateData = [
+                Candidate::create([
                     'name' => $name,
                     'email' => $email,
                     'phone' => $phone,
-                    'experience_years' => $experience_years,
                     'age' => $age,
+                    'experience_years' => $experience_years,
                     'previous_experience' => $previousExperience,
-                ];
+                ]);
 
-                // Check if candidate with this email already exists
-                if (!empty($candidateData['email'])) {
-                    $existingCandidate = Candidate::where('email', $candidateData['email'])->first();
-                    if (!$existingCandidate) {
-                        $candidate = Candidate::create($candidateData);
-                        \Log::info('Created candidate: ' . $candidate->id . ' - ' . $candidate->name);
-                        $processedCount++;
-                    } else {
-                        \Log::info('Candidate with email ' . $candidateData['email'] . ' already exists, skipping');
-                        $skippedCount++;
-                    }
-                } else {
-                    \Log::info('No email found for candidate, skipping');
-                    $skippedCount++;
-                }
-            } else {
-                \Log::info('Row does not have valid Career Summary data, skipping');
-                $skippedCount++;
+                $processedCount++;
             }
-        }
 
-        \Log::info("Import completed. Processed: $processedCount, Skipped: $skippedCount");
+            return redirect()
+                ->route('candidates.index')
+                ->with('success', "Import successful. Processed: {$processedCount}, Skipped: {$skippedCount}");
 
         } catch (\Exception $e) {
-            \Log::error('Error importing Excel file: ' . $e->getMessage());
-            return redirect()->route('candidates.index')->with('error', 'Error importing file: ' . $e->getMessage());
+            \Log::error($e);
+            return back()->with('error', 'Import failed: ' . $e->getMessage());
         }
-
-        return redirect()->route('candidates.index')->with('success', "Candidates imported successfully. Processed: $processedCount, Skipped: $skippedCount");
     }
+
 
     public function allCandidates()
     {
@@ -340,59 +259,124 @@ class CandidateController extends Controller
     public function scheduleInterview(Request $request)
     {
         $request->validate([
-            'candidate_ids' => 'required|array',
+            'interview_date' => 'required|date|after:today',
+            'candidate_ids' => 'nullable|array',
             'candidate_ids.*' => 'exists:candidates,id',
-            'interview_date' => 'required|date|after:today'
+            'range_start' => 'nullable|integer|min:1',
+            'range_end' => 'nullable|integer|min:1|gte:range_start',
         ]);
 
-        Candidate::whereIn('id', $request->candidate_ids)
+        $candidateIds = $request->candidate_ids ?: [];
+
+        // Handle range selection if provided
+        if ($request->filled(['range_start', 'range_end'])) {
+            $rangeStart = $request->range_start;
+            $rangeEnd = $request->range_end;
+
+            // Get candidates within the range
+            $rangeCandidates = Candidate::where('status', 'pending')
+                ->orderBy('id')
+                ->offset($rangeStart - 1)
+                ->limit($rangeEnd - $rangeStart + 1)
+                ->pluck('id')
+                ->toArray();
+
+            $candidateIds = array_merge($candidateIds, $rangeCandidates);
+        }
+
+        if (empty($candidateIds)) {
+            return redirect()->back()->with('error', 'No candidates selected for interview scheduling.');
+        }
+
+        Candidate::whereIn('id', $candidateIds)
             ->update([
                 'status' => 'interview_scheduled',
                 'interview_date' => $request->interview_date
             ]);
 
-        return redirect()->route('candidates.upcoming-interviews')->with('success', 'Interviews scheduled successfully.');
+        return redirect()->route('candidates.upcoming-interviews')->with('success', 'Interviews scheduled successfully for ' . count($candidateIds) . ' candidate(s).');
     }
 
     public function upcomingInterviews()
     {
-        $candidates = Candidate::where('status', 'interview_scheduled')
-            ->where('interview_date', '>=', now())
-            ->orderBy('interview_date', 'asc')
-            ->get();
-        return view('candidates.upcoming', compact('candidates'));
+        \Log::info('upcomingInterviews method called');
+        try {
+            $candidates = Candidate::whereIn('status', ['interview_scheduled', 'second_interview_scheduled'])
+                ->where('interview_date', '>=', now())
+                ->orderBy('interview_date', 'asc')
+                ->get();
+            \Log::info('Candidates retrieved: ' . $candidates->count());
+            return view('candidates.upcoming', compact('candidates'));
+        } catch (\Exception $e) {
+            \Log::error('Error in upcomingInterviews: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            abort(500, 'Internal server error');
+        }
+    }
+
+    public function secondInterviews()
+    {
+        \Log::info('secondInterviews method called');
+        try {
+            $candidates = Candidate::where('status', 'second_interview_scheduled')
+                ->where('interview_date', '>=', now())
+                ->orderBy('interview_date', 'asc')
+                ->get();
+            \Log::info('Second interview candidates retrieved: ' . $candidates->count());
+            return view('candidates.second-interviews', compact('candidates'));
+        } catch (\Exception $e) {
+            \Log::error('Error in secondInterviews: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            abort(500, 'Internal server error');
+        }
     }
 
     public function completedInterviews()
     {
-        $candidates = Candidate::where('status', 'interview_completed')
-            ->orWhere(function($query) {
-                $query->where('status', 'interview_scheduled')
-                      ->where('interview_date', '<', now());
-            })
-            ->get();
+        \Log::info('completedInterviews method called');
+        try {
+            // Update status for past interviews (including second interviews)
+            Candidate::whereIn('status', ['interview_scheduled', 'second_interview_scheduled'])
+                ->where('interview_date', '<', now())
+                ->update(['status' => 'interview_completed']);
 
-        // Update status for past interviews
-        Candidate::where('status', 'interview_scheduled')
-            ->where('interview_date', '<', now())
-            ->update(['status' => 'interview_completed']);
+            // Get candidates who have completed interviews OR had interviews in the past
+            $candidates = Candidate::where('status', 'interview_completed')
+                ->orWhere(function($query) {
+                    $query->whereIn('status', ['interview_scheduled', 'second_interview_scheduled'])
+                          ->where('interview_date', '<', now());
+                })
+                ->get();
 
-        return view('candidates.completed', compact('candidates'));
+            \Log::info('Completed candidates retrieved: ' . $candidates->count());
+            return view('candidates.completed', compact('candidates'));
+        } catch (\Exception $e) {
+            \Log::error('Error in completedInterviews: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            abort(500, 'Internal server error');
+        }
     }
 
     public function markInterviewStatus(Request $request, $id)
     {
+        \Log::info('markInterviewStatus called', ['id' => $id, 'status' => $request->status]);
+
         $request->validate([
-            'status' => 'required|in:passed,failed'
+            'status' => 'required|in:pending,hired,rejected,interview_scheduled,interview_completed,passed,failed,second_interview_scheduled'
         ]);
 
         $candidate = Candidate::findOrFail($id);
+
+        \Log::info('Updating candidate status', ['candidate_id' => $id, 'new_status' => $request->status]);
+
         $candidate->update([
-            'status' => $request->status === 'passed' ? 'passed' : 'failed',
+            'status' => $request->status,
             'interview_date' => now()
         ]);
 
-        return redirect()->back()->with('success', 'Interview status updated successfully.');
+        \Log::info('Candidate status updated successfully', ['candidate_id' => $id, 'new_status' => $request->status]);
+
+        return redirect()->back()->with('success', 'Candidate status updated successfully.');
     }
 
     public function downloadPhoneNumbers()
@@ -406,5 +390,25 @@ class CandidateController extends Controller
         return response($phoneNumbers)
             ->header('Content-Type', 'text/plain')
             ->header('Content-Disposition', 'attachment; filename=upcoming_interview_phones.txt');
+    }
+
+    public function scheduleSecondInterviewForm(Candidate $candidate)
+    {
+        return view('candidates.schedule-second-interview', compact('candidate'));
+    }
+
+    public function scheduleSecondInterview(Request $request, Candidate $candidate)
+    {
+        $request->validate([
+            'interview_date' => 'required|date|after:today'
+        ]);
+
+        // Update candidate status to indicate second interview scheduled
+        $candidate->update([
+            'status' => 'second_interview_scheduled',
+            'interview_date' => $request->interview_date
+        ]);
+
+        return redirect()->route('candidates.upcoming-interviews')->with('success', 'Second interview scheduled successfully for ' . $candidate->name . '.');
     }
 }

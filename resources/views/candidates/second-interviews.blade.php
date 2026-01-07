@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Rejected Candidates')
+@section('title', 'Second Interviews')
 
 @section('content')
     <div style="max-width:1200px; margin:0 auto; padding:1rem;">
-        <h2 style="font-size:1.5rem; font-weight:bold; margin-bottom:1rem;">Rejected Candidates</h2>
+        <h2 style="font-size:1.5rem; font-weight:bold; margin-bottom:1rem;">Second Interviews</h2>
 
         <div style="background:#fff; border-radius:0.5rem; box-shadow:0 1px 3px rgba(0,0,0,0.1); overflow-x:auto;">
             <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
@@ -13,8 +13,8 @@
                         <th style="padding:1rem 1.5rem; text-align:left; font-weight:600; color:#374151;">Name</th>
                         <th style="padding:1rem 1.5rem; text-align:left; font-weight:600; color:#374151;">Email</th>
                         <th style="padding:1rem 1.5rem; text-align:left; font-weight:600; color:#374151;">Phone</th>
-                        <th style="padding:1rem 1.5rem; text-align:left; font-weight:600; color:#374151;">Experience</th>
-                        <th style="padding:1rem 1.5rem; text-align:left; font-weight:600; color:#374151;">Rejection Date</th>
+                        <th style="padding:1rem 1.5rem; text-align:left; font-weight:600; color:#374151;">Status</th>
+                        <th style="padding:1rem 1.5rem; text-align:left; font-weight:600; color:#374151;">Interview Date</th>
                         <th style="padding:1rem 1.5rem; text-align:right; font-weight:600; color:#374151;">Actions</th>
                     </tr>
                 </thead>
@@ -24,8 +24,28 @@
                             <td style="padding:1rem 1.5rem; font-weight:500; color:#1f2937;">{{ $candidate->name }}</td>
                             <td style="padding:1rem 1.5rem; color:#4b5563;">{{ $candidate->email }}</td>
                             <td style="padding:1rem 1.5rem; color:#4b5563;">{{ $candidate->phone }}</td>
-                            <td style="padding:1rem 1.5rem; color:#4b5563;">{{ $candidate->experience_years }} years</td>
-                            <td style="padding:1rem 1.5rem; color:#4b5563;">{{ $candidate->updated_at->format('Y-m-d') }}
+                            <td style="padding:1rem 1.5rem;">
+                                @php
+                                    $statusColors = [
+                                        'pending' => ['bg' => '#fef3c7', 'text' => '#78350f'],
+                                        'hired' => ['bg' => '#d1fae5', 'text' => '#065f46'],
+                                        'rejected' => ['bg' => '#fee2e2', 'text' => '#991b1b'],
+                                        'interview_scheduled' => ['bg' => '#fef3c7', 'text' => '#78350f'],
+                                        'interview_completed' => ['bg' => '#e0d7ff', 'text' => '#6b21a8'],
+                                        'passed' => ['bg' => '#d1fae5', 'text' => '#065f46'],
+                                        'failed' => ['bg' => '#fee2e2', 'text' => '#991b1b'],
+                                        'second_interview_scheduled' => ['bg' => '#fef9c3', 'text' => '#78350f'],
+                                        'default' => ['bg' => '#f3f4f6', 'text' => '#374151'],
+                                    ];
+                                    $s = $statusColors[$candidate->status] ?? $statusColors['default'];
+                                @endphp
+                                <span
+                                    style="display:inline-block; padding:0.25rem 0.75rem; font-size:0.75rem; font-weight:600; border-radius:9999px; background:{{ $s['bg'] }}; color:{{ $s['text'] }};">
+                                    {{ ucfirst(str_replace('_', ' ', $candidate->status)) }}
+                                </span>
+                            </td>
+                            <td style="padding:1rem 1.5rem;">
+                                {{ $candidate->interview_date ? $candidate->interview_date->format('Y-m-d H:i') : 'N/A' }}
                             </td>
                             <td style="padding:1rem 1.5rem; text-align:right; position:relative;">
                                 <div style="position:relative; display:inline-block;">
@@ -71,8 +91,8 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" style="padding:1rem 1.5rem; text-align:center; color:#6b7280;">No rejected
-                                candidates found.</td>
+                            <td colspan="6" style="padding:1rem 1.5rem; text-align:center; color:#6b7280;">No second
+                                interviews scheduled.</td>
                         </tr>
                     @endforelse
                 </tbody>

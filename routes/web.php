@@ -34,10 +34,7 @@ Route::middleware('auth')->group(function () {
             return view('admin.dashboard');
         })->name('admin.dashboard');
 
-        // Candidate management routes
-        Route::resource('candidates', CandidateController::class);
-
-        // Additional candidate routes
+        // Additional candidate routes (defined first to ensure priority)
         Route::get('/candidates/import/form', [CandidateController::class, 'importForm'])->name('candidates.import.form');
         Route::post('/candidates/import', [CandidateController::class, 'import'])->name('candidates.import');
         Route::get('/candidates/all', [CandidateController::class, 'allCandidates'])->name('candidates.all');
@@ -46,9 +43,21 @@ Route::middleware('auth')->group(function () {
         Route::get('/candidates/schedule/interview/form', [CandidateController::class, 'scheduleInterviewForm'])->name('candidates.schedule.form');
         Route::post('/candidates/schedule/interview', [CandidateController::class, 'scheduleInterview'])->name('candidates.schedule.interview');
         Route::get('/candidates/upcoming-interviews', [CandidateController::class, 'upcomingInterviews'])->name('candidates.upcoming-interviews');
+        Route::get('/candidates/second-interviews', [CandidateController::class, 'secondInterviews'])->name('candidates.second.interviews');
         Route::get('/candidates/completed-interviews', [CandidateController::class, 'completedInterviews'])->name('candidates.completed-interviews');
         Route::post('/candidates/{id}/mark-status', [CandidateController::class, 'markInterviewStatus'])->name('candidates.mark.status');
         Route::get('/candidates/download/phones', [CandidateController::class, 'downloadPhoneNumbers'])->name('candidates.download.phones');
+        Route::get('/candidates/{candidate}/schedule-second-interview', [CandidateController::class, 'scheduleSecondInterviewForm'])->name('candidates.schedule.second.interview.form');
+        Route::post('/candidates/{candidate}/schedule-second-interview', [CandidateController::class, 'scheduleSecondInterview'])->name('candidates.schedule.second.interview');
+
+        // Define only the necessary resource routes to avoid conflicts
+        Route::get('/candidates', [CandidateController::class, 'index'])->name('candidates.index');
+        Route::get('/candidates/create', [CandidateController::class, 'create'])->name('candidates.create');
+        Route::post('/candidates', [CandidateController::class, 'store'])->name('candidates.store');
+        Route::get('/candidates/{candidate}', [CandidateController::class, 'show'])->name('candidates.show');
+        Route::get('/candidates/{candidate}/edit', [CandidateController::class, 'edit'])->name('candidates.edit');
+        Route::put('/candidates/{candidate}', [CandidateController::class, 'update'])->name('candidates.update');
+        Route::delete('/candidates/{candidate}', [CandidateController::class, 'destroy'])->name('candidates.destroy');
     });
 
     // Staff routes

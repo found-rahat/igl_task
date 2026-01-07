@@ -5,27 +5,56 @@
 @section('content')
 <div class="max-w-7xl mx-auto">
     <h2 class="text-2xl font-bold mb-6">Admin Dashboard</h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div class="bg-white p-6 rounded-lg shadow">
             <h3 class="text-lg font-semibold mb-2">Manage Candidates</h3>
             <p class="text-gray-600">View, edit, and manage all candidate information</p>
-            <a href="#" class="text-blue-600 hover:underline mt-2 inline-block">View Candidates</a>
+            <div class="mt-2 space-y-1">
+                <a href="{{ route('candidates.index') }}" class="block text-blue-600 hover:underline">All Candidates</a>
+                <a href="{{ route('candidates.hired') }}" class="block text-blue-600 hover:underline">Hired Candidates</a>
+                <a href="{{ route('candidates.rejected') }}" class="block text-blue-600 hover:underline">Rejected Candidates</a>
+            </div>
         </div>
-        
+
         <div class="bg-white p-6 rounded-lg shadow">
             <h3 class="text-lg font-semibold mb-2">Schedule Interviews</h3>
             <p class="text-gray-600">Schedule interviews for candidates</p>
-            <a href="#" class="text-blue-600 hover:underline mt-2 inline-block">Schedule Interviews</a>
+            <a href="{{ route('candidates.schedule.form') }}" class="block text-blue-600 hover:underline mt-2">Schedule Interviews</a>
         </div>
-        
+
         <div class="bg-white p-6 rounded-lg shadow">
-            <h3 class="text-lg font-semibold mb-2">View Reports</h3>
-            <p class="text-gray-600">View system reports and analytics</p>
-            <a href="#" class="text-blue-600 hover:underline mt-2 inline-block">View Reports</a>
+            <h3 class="text-lg font-semibold mb-2">Interview Management</h3>
+            <p class="text-gray-600">Manage upcoming and completed interviews</p>
+            <div class="mt-2 space-y-1">
+                <a href="{{ route('candidates.upcoming-interviews') }}" class="block text-blue-600 hover:underline">Upcoming Interviews</a>
+                <a href="{{ route('candidates.completed-interviews') }}" class="block text-blue-600 hover:underline">Completed Interviews</a>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-2">Import Candidates</h3>
+            <p class="text-gray-600">Import candidate data from Excel</p>
+            <a href="{{ route('candidates.import.form') }}" class="block text-blue-600 hover:underline mt-2">Import Candidates</a>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-2">Reports</h3>
+            <p class="text-gray-600">Download reports and analytics</p>
+            <a href="{{ route('candidates.download.phones') }}" class="block text-blue-600 hover:underline mt-2">Download Phone Numbers</a>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-2">System Status</h3>
+            <p class="text-gray-600">View system statistics</p>
+            <div class="mt-2 space-y-1">
+                <p class="text-gray-700">Total Candidates: {{ \App\Models\Candidate::count() }}</p>
+                <p class="text-gray-700">Pending: {{ \App\Models\Candidate::where('status', 'pending')->count() }}</p>
+                <p class="text-gray-700">Hired: {{ \App\Models\Candidate::where('status', 'hired')->count() }}</p>
+            </div>
         </div>
     </div>
-    
+
     <!-- Recent Activity Section -->
     <div class="mt-8 bg-white p-6 rounded-lg shadow">
         <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
@@ -37,8 +66,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-gray-700"><span class="font-medium">John Doe</span> applied for the position</p>
-                    <p class="text-gray-500 text-sm">2 hours ago</p>
+                    <p class="text-gray-700">New candidate registered</p>
+                    <p class="text-gray-500 text-sm">{{ \App\Models\Candidate::latest()->first() ? \App\Models\Candidate::latest()->first()->created_at->diffForHumans() : 'No recent activity' }}</p>
                 </div>
             </div>
             <div class="flex items-start">
@@ -48,8 +77,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-gray-700"><span class="font-medium">Jane Smith</span> interview scheduled for tomorrow</p>
-                    <p class="text-gray-500 text-sm">4 hours ago</p>
+                    <p class="text-gray-700">Interview scheduled</p>
+                    <p class="text-gray-500 text-sm">{{ \App\Models\Candidate::where('status', 'interview_scheduled')->latest()->first() ? \App\Models\Candidate::where('status', 'interview_scheduled')->latest()->first()->updated_at->diffForHumans() : 'No recent interviews' }}</p>
                 </div>
             </div>
             <div class="flex items-start">
@@ -59,8 +88,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-gray-700"><span class="font-medium">Mike Johnson</span> application under review</p>
-                    <p class="text-gray-500 text-sm">1 day ago</p>
+                    <p class="text-gray-700">Candidate hired</p>
+                    <p class="text-gray-500 text-sm">{{ \App\Models\Candidate::where('status', 'hired')->latest()->first() ? \App\Models\Candidate::where('status', 'hired')->latest()->first()->updated_at->diffForHumans() : 'No recent hires' }}</p>
                 </div>
             </div>
         </div>
