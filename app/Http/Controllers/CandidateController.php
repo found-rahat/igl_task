@@ -335,12 +335,13 @@ class CandidateController extends Controller
         try {
             // Get candidates who have completed interviews OR had interviews in the past
             // Also include candidates with 'passed' status as they are part of the completed interview flow
+            // Exclude 'second_interview_scheduled' as these are upcoming second interviews, not completed
             $candidates = Candidate::where(function($query) {
                 $query->where('status', 'interview_completed')
                       ->orWhere('status', 'passed')
                       ->orWhere('status', 'failed')
                       ->orWhere(function($subQuery) {
-                          $subQuery->whereIn('status', ['interview_scheduled', 'second_interview_scheduled']);
+                          $subQuery->where('status', 'interview_scheduled');
                       });
             })
             ->get();
@@ -374,6 +375,48 @@ class CandidateController extends Controller
         \Log::info('Candidate status updated successfully', ['candidate_id' => $id, 'new_status' => $request->status]);
 
         return redirect()->back()->with('success', 'Candidate status updated successfully.');
+    }
+
+    public function bulkScheduleSecondInterview(Request $request)
+    {
+        $request->validate([
+            'candidate_ids' => 'required|string', // Accept as string since it's JSON
+            'interview_date' => 'required|date|after:today'
+        ]);
+
+        $candidateIds = json_decode($request->candidate_ids, true);
+
+        if (!is_array($candidateIds) || empty($candidateIds)) {
+            return redirect()->back()->with('error', 'Invalid candidate selection.');
+        }
+
+        // Validate that all IDs exist in the database
+        $existingIds = \App\Models\Candidate::whereIn('id', $candidateIds)->pluck('id')->toArray();
+
+        if (count($existingIds) !== count($candidateIds)) {
+            return redirect()->back()->with('error', 'Some selected candidates do not exist.');
+        }
+
+        // Get the actual candidates to check their current status
+        $candidates = \App\Models\Candidate::whereIn('id', $existingIds)->get();
+
+        // Filter to only include candidates with 'passed' or 'interview_completed' status
+        $validCandidateIds = $candidates->filter(function($candidate) {
+            return in_array($candidate->status, ['passed', 'interview_completed']);
+        })->pluck('id')->toArray();
+
+        if (empty($validCandidateIds)) {
+            return redirect()->back()->with('error', 'No selected candidates are eligible for second interview scheduling.');
+        }
+
+        // Update the selected candidates
+        \App\Models\Candidate::whereIn('id', $validCandidateIds)
+            ->update([
+                'status' => 'second_interview_scheduled',
+                'interview_date' => $request->interview_date
+            ]);
+
+        return redirect()->route('candidates.second.interviews')->with('success', 'Second interviews scheduled successfully for ' . count($validCandidateIds) . ' candidate(s).');
     }
 
     public function downloadPhoneNumbers()

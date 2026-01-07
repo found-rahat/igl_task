@@ -4,12 +4,28 @@
 
 @section('content')
     <div class="max-w-7xl mx-auto">
-        <h2 class="text-2xl font-bold mb-6">Completed Interviews</h2>
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">Completed Interviews</h2>
+            <!-- Bulk Schedule Second Interview Form -->
+            <form action="{{ route('candidates.bulk.schedule.second.interview') }}" method="POST" id="bulk-schedule-form">
+                @csrf
+                <input type="hidden" name="candidate_ids" id="selected-candidate-ids" value="">
+                <div class="flex items-center space-x-4">
+                    <label for="interview_date_bulk" class="block text-sm font-medium text-gray-700">Bulk Schedule 2nd Interview:</label>
+                    <input type="datetime-local" name="interview_date" id="interview_date_bulk" class="px-3 py-2 border border-gray-300 rounded-md" required>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" id="bulk-schedule-btn" disabled>Schedule Selected</button>
+                </div>
+            </form>
+        </div>
 
         <div style="background-color: #fff; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
                 <thead style="background-color: #f3f4f6;">
                     <tr>
+                        <th style="padding: 1rem 1.5rem; text-align: left; font-weight: 600; color: #374151;">
+                            <input type="checkbox" id="select-all-eligible" onchange="toggleEligibleSelection(this)" style="margin-right: 0.5rem;">
+                            Select All Eligible
+                        </th>
                         <th style="padding: 1rem 1.5rem; text-align: left; font-weight: 600; color: #374151;">Name</th>
                         <th style="padding: 1rem 1.5rem; text-align: left; font-weight: 600; color: #374151;">Email</th>
                         <th style="padding: 1rem 1.5rem; text-align: left; font-weight: 600; color: #374151;">Status</th>
@@ -21,6 +37,13 @@
                 <tbody>
                     @forelse($candidates as $candidate)
                         <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 1rem 1.5rem;">
+                                @if(in_array($candidate->status, ['passed', 'interview_completed']))
+                                    <input type="checkbox" name="eligible_candidate_ids[]" value="{{ $candidate->id }}" class="eligible-checkbox" onchange="updateBulkButton()" style="margin-right: 0.5rem;">
+                                @else
+                                    <span>-</span>
+                                @endif
+                            </td>
                             <td style="padding: 1rem 1.5rem; font-weight: 500; color: #1f2937;">{{ $candidate->name }}</td>
                             <td style="padding: 1rem 1.5rem; color: #4b5563;">{{ $candidate->email }}</td>
                             <td style="padding: 1rem 1.5rem;">
@@ -52,6 +75,7 @@
                                         </svg>
                                     </button>
                                     <div id="dropdown-{{ $candidate->id }}"
+                                        class="dropdown-container"
                                         style="display:none; position:absolute; right:0; margin-top:0.5rem; width:11rem; background:#fff; border-radius:0.375rem; box-shadow:0 1px 3px rgba(0,0,0,0.1); border:1px solid #e5e7eb; z-index:50;">
                                         <a href="{{ route('candidates.show', $candidate) }}"
                                             style="display:block; padding:0.5rem 1rem; font-size:0.875rem; color:#4b5563; text-decoration:none;"
@@ -88,7 +112,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" style="padding:1.5rem; text-align:center; color:#6b7280;">No completed
+                            <td colspan="6" style="padding:1.5rem; text-align:center; color:#6b7280;">No completed
                                 interviews.</td>
                         </tr>
                     @endforelse
@@ -118,6 +142,47 @@
             if (!e.target.closest('.dropdown-container') && !e.target.closest('[id^="dropdown-"]')) {
                 document.querySelectorAll('[id^="dropdown-"]').forEach(el => el.style.display = 'none');
             }
+        });
+        
+        // Bulk selection functions
+        function toggleEligibleSelection(selectAllCheckbox) {
+            const checkboxes = document.querySelectorAll('.eligible-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+            updateBulkButton();
+        }
+
+        function updateBulkButton() {
+            const selectedCheckboxes = document.querySelectorAll('.eligible-checkbox:checked');
+            const bulkBtn = document.getElementById('bulk-schedule-btn');
+            const selectedIdsInput = document.getElementById('selected-candidate-ids');
+
+            if (selectedCheckboxes.length > 0) {
+                bulkBtn.disabled = false;
+                // Update the hidden input with selected IDs
+                const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+                selectedIdsInput.value = JSON.stringify(selectedIds);
+                console.log('Selected IDs:', selectedIds); // Debug log
+            } else {
+                bulkBtn.disabled = true;
+                selectedIdsInput.value = '';
+                console.log('No IDs selected'); // Debug log
+            }
+        }
+
+        // Update individual checkbox status when bulk form is submitted
+        document.getElementById('bulk-schedule-form').addEventListener('submit', function(e) {
+            const selectedCheckboxes = document.querySelectorAll('.eligible-checkbox:checked');
+            const selectedIdsInput = document.getElementById('selected-candidate-ids');
+
+            if (selectedCheckboxes.length === 0 || selectedIdsInput.value === '') {
+                e.preventDefault();
+                alert('Please select at least one candidate to schedule a second interview.');
+                return false;
+            }
+
+            console.log('Form submitting with IDs:', selectedIdsInput.value); // Debug log
         });
     </script>
 @endsection

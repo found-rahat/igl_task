@@ -60,6 +60,11 @@ Route::middleware('auth')->group(function () {
         Route::delete('/candidates/{candidate}', [CandidateController::class, 'destroy'])->name('candidates.destroy');
     });
 
+    // Admin routes
+    Route::middleware('role:admin')->group(function () {
+        Route::post('/candidates/bulk-schedule-second-interview', [CandidateController::class, 'bulkScheduleSecondInterview'])->name('candidates.bulk.schedule.second.interview');
+    });
+
     // Staff routes
     Route::middleware('role:admin,staff')->group(function () {
         Route::get('/staff/dashboard', function () {

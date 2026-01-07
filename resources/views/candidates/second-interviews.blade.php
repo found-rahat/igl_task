@@ -48,7 +48,8 @@
                                 {{ $candidate->interview_date ? $candidate->interview_date->format('Y-m-d H:i') : 'N/A' }}
                             </td>
                             <td style="padding:1rem 1.5rem; text-align:right; position:relative;">
-                                <div style="position:relative; display:inline-block;">
+                                <div class="dropdown-container"
+                                    style="position:relative; display:inline-block; text-align: left;">
                                     <button type="button" onclick="toggleDropdown({{ $candidate->id }}, event)"
                                         style="color:#4b5563; background:none; border:none; cursor:pointer;">
                                         <svg style="width:1.25rem; height:1.25rem;" fill="currentColor" viewBox="0 0 20 20">
@@ -57,7 +58,7 @@
                                         </svg>
                                     </button>
 
-                                    <div id="dropdown-{{ $candidate->id }}"
+                                    <div id="dropdown-{{ $candidate->id }}" class="dropdown-container"
                                         style="display:none; position:absolute; right:0; margin-top:0.5rem; width:11rem; background:#fff; border-radius:0.375rem; box-shadow:0 1px 3px rgba(0,0,0,0.1); border:1px solid #e5e7eb; z-index:50;">
                                         <a href="{{ route('candidates.show', $candidate) }}"
                                             style="display:block; padding:0.5rem 1rem; font-size:0.875rem; color:#4b5563; text-decoration:none;"
@@ -74,14 +75,27 @@
                                                 style="width:100%; border:none; font-size:0.875rem; padding:0.5rem 1rem;"
                                                 onchange="document.getElementById('status-form-{{ $candidate->id }}').submit();">
                                                 <option value="" disabled selected>Update Status</option>
-                                                <option value="pending" {{ $candidate->status !== 'pending' ? '' : 'disabled' }}>Pending</option>
-                                                <option value="hired" {{ $candidate->status !== 'hired' ? '' : 'disabled' }}>Hired</option>
-                                                <option value="rejected" {{ $candidate->status !== 'rejected' ? '' : 'disabled' }}>Rejected</option>
-                                                <option value="interview_scheduled" {{ $candidate->status !== 'interview_scheduled' ? '' : 'disabled' }}>Interview Scheduled</option>
-                                                <option value="interview_completed" {{ $candidate->status !== 'interview_completed' ? '' : 'disabled' }}>Interview Completed</option>
-                                                <option value="passed" {{ $candidate->status !== 'passed' ? '' : 'disabled' }}>Passed</option>
-                                                <option value="failed" {{ $candidate->status !== 'failed' ? '' : 'disabled' }}>Failed</option>
-                                                <option value="second_interview_scheduled" {{ $candidate->status !== 'second_interview_scheduled' ? '' : 'disabled' }}>Second Interview Scheduled
+                                                <option value="pending"
+                                                    {{ $candidate->status !== 'pending' ? '' : 'disabled' }}>Pending
+                                                </option>
+                                                <option value="hired"
+                                                    {{ $candidate->status !== 'hired' ? '' : 'disabled' }}>Hire Candidate</option>
+                                                <option value="rejected"
+                                                    {{ $candidate->status !== 'rejected' ? '' : 'disabled' }}>Rejected
+                                                </option>
+                                                <option value="interview_scheduled"
+                                                    {{ $candidate->status !== 'interview_scheduled' ? '' : 'disabled' }}>
+                                                    Interview Scheduled</option>
+                                                <option value="interview_completed"
+                                                    {{ $candidate->status !== 'interview_completed' ? '' : 'disabled' }}>
+                                                    Interview Completed</option>
+                                                <option value="passed"
+                                                    {{ $candidate->status !== 'passed' ? '' : 'disabled' }}>Passed</option>
+                                                <option value="failed"
+                                                    {{ $candidate->status !== 'failed' ? '' : 'disabled' }}>Failed</option>
+                                                <option value="second_interview_scheduled"
+                                                    {{ $candidate->status !== 'second_interview_scheduled' ? '' : 'disabled' }}>
+                                                    Second Interview Scheduled
                                                 </option>
                                             </select>
                                         </form>
