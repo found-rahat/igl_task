@@ -78,6 +78,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/candidates/import', [CandidateController::class, 'import'])->name('candidates.import');
     });
 
+    // Public candidate search route (no authentication required)
+    Route::get('/candidate/search', [CandidateController::class, 'searchForm'])->name('candidate.search.form');
+    Route::post('/candidate/search', [CandidateController::class, 'search'])->name('candidate.search');
+
     // Candidate routes
     Route::middleware('role:admin,staff,candidate')->group(function () {
         Route::get('/candidate/dashboard', function () {
@@ -86,7 +90,10 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-// Default route - redirect to login
+// Default route - show home page with company information
 Route::get('/', function () {
-    return redirect()->route('login');
-});
+    return view('home');
+})->name('home');
+
+// Login redirect route
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

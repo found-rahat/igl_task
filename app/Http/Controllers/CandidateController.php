@@ -432,6 +432,26 @@ class CandidateController extends Controller
             ->header('Content-Disposition', 'attachment; filename=upcoming_interview_phones.txt');
     }
 
+    public function searchForm()
+    {
+        return view('candidates.search');
+    }
+
+    public function search(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string'
+        ]);
+
+        $candidate = Candidate::where('phone', $request->phone)->first();
+
+        if (!$candidate) {
+            return redirect()->back()->with('error', 'Candidate not found with this phone number.');
+        }
+
+        return view('candidates.search-result', compact('candidate'));
+    }
+
     public function scheduleSecondInterviewForm(Candidate $candidate)
     {
         return view('candidates.schedule-second-interview', compact('candidate'));
