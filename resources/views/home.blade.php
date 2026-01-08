@@ -196,11 +196,11 @@
 <body>
     <div class="container">
         <!-- Top Login Bar -->
-        <div style="text-align: right; margin-bottom: 10px;">
+        {{-- <div style="text-align: right; margin-bottom: 10px;">
             <a href="{{ route('login') }}"
                 style="background: #3498db; color: white; padding: 8px 16px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 0.9rem;">Admin/Staff
                 Login</a>
-        </div>
+        </div> --}}
 
         <!-- Header -->
         <header class="header">
@@ -212,9 +212,7 @@
             <nav class="nav-menu">
                 <a href="{{ route('home') }}" class="nav-item">Home</a>
                 <a href="{{ route('candidate.search.form') }}" class="nav-item">Candidate Search</a>
-                <a href="{{ route('candidates.index') }}" class="nav-item">All Candidates</a>
-                <a href="{{ route('candidates.hired') }}" class="nav-item">Hired Candidates</a>
-                <a href="{{ route('candidates.rejected') }}" class="nav-item">Rejected Candidates</a>
+                <a href="{{ route('login') }}" class="nav-item">Admin/stuff Login</a>
             </nav>
         </header>
 
