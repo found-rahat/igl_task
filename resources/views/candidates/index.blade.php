@@ -109,6 +109,11 @@
                                         'pending' => ['bg' => '#fef3c7', 'text' => '#78350f'],
                                         'hired' => ['bg' => '#d1fae5', 'text' => '#065f46'],
                                         'rejected' => ['bg' => '#fee2e2', 'text' => '#991b1b'],
+                                        'interview_scheduled' => ['bg' => '#bfdbfe', 'text' => '#1d4ed8'],
+                                        'interview_completed' => ['bg' => '#e9d5ff', 'text' => '#6b21a8'],
+                                        'passed' => ['bg' => '#d1fae5', 'text' => '#065f46'],
+                                        'failed' => ['bg' => '#fee2e2', 'text' => '#991b1b'],
+                                        'second_interview_scheduled' => ['bg' => '#fef3c7', 'text' => '#78350f'],
                                         'default' => ['bg' => '#f3f4f6', 'text' => '#374151'],
                                     ];
                                     $status = $statusColors[$candidate->status] ?? $statusColors['default'];
@@ -123,7 +128,7 @@
                                 background-color: {{ $status['bg'] }};
                                 color: {{ $status['text'] }};
                             ">
-                                    {{ ucfirst($candidate->status) }}
+                                    {{ ucfirst(str_replace('_', ' ', $candidate->status)) }}
                                 </span>
                             </td>
                             <td style="padding: 1rem 1.5rem; text-align: right;">
