@@ -32,6 +32,15 @@ Route::middleware('auth')->group(function () {
             return view('admin.dashboard');
         })->name('admin.dashboard');
 
+        // User management routes
+        Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [App\Http\Controllers\UserController::class, 'create'])->name('users.create');
+        Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.destroy');
+        Route::patch('/users/{user}/toggle-status', [App\Http\Controllers\UserController::class, 'toggleStatus'])->name('users.toggle-status');
+
         // Additional candidate routes (defined first to ensure priority)
         Route::get('/candidates/import/form', [CandidateController::class, 'importForm'])->name('candidates.import.form');
         Route::post('/candidates/import', [CandidateController::class, 'import'])->name('candidates.import');
