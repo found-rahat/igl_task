@@ -30,6 +30,14 @@ class LoginController extends Controller
 
             $user = Auth::user();
 
+            // Check if user is active
+            if ($user->status !== 'active') {
+                Auth::logout(); // Log the user out immediately
+                throw ValidationException::withMessages([
+                    'email' => ['Your account is inactive. Please contact administrator.'],
+                ]);
+            }
+
             // Redirect based on user role
             switch ($user->role) {
                 case 'admin':

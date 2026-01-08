@@ -3,105 +3,77 @@
 @section('title', 'Add Staff Member')
 
 @section('content')
-    <div class="w-full max-w-4xl mx-auto px-6 py-8">
+<div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 0 1.5rem;">
 
-        <!-- Card -->
-        <div class="bg-white shadow-lg rounded-lg">
-
-            <!-- Header -->
-            <div class="border-b px-6 py-4">
-                <h2 class="text-xl font-semibold text-gray-800">
-                    Add Staff Member
-                </h2>
-                <p class="text-sm text-gray-500 mt-1">
-                    Create a new staff account with login credentials
-                </p>
-            </div>
-
-            <!-- Form -->
-            <form method="POST" action="{{ route('users.store') }}" class="px-6 py-6 space-y-6">
-                @csrf
-
-                <!-- Name -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Full Name
-                    </label>
-                    <input type="text" name="name" value="{{ old('name') }}"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
-                           focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                        placeholder="Enter full name" required>
-                    @error('name')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Email -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Email Address
-                    </label>
-                    <input type="email" name="email" value="{{ old('email') }}"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
-                           focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                        placeholder="example@email.com" required>
-                    @error('email')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Password -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Password
-                        </label>
-                        <input type="password" name="password"
-                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
-                               focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                            placeholder="********" required>
-                        @error('password')
-                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Confirm Password
-                        </label>
-                        <input type="password" name="password_confirmation"
-                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
-                               focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                            placeholder="********" required>
-                    </div>
-                </div>
-
-                <!-- Role -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Role
-                    </label>
-                    <select name="role"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
-                           focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                        <option value="staff" selected>Staff</option>
-                    </select>
-                </div>
-
-                <!-- Buttons -->
-                <div class="flex justify-end gap-3 pt-4 border-t">
-                    <a href="{{ route('users.index') }}"
-                        class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-100">
-                        Cancel
-                    </a>
-
-                    <button type="submit"
-                        class="px-5 py-2 rounded-md bg-blue-600 text-sm text-white font-medium hover:bg-blue-700">
-                        Add Staff
-                    </button>
-                </div>
-            </form>
-        </div>
-
+    <!-- Header -->
+    <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937;">Add New Staff Member</h2>
+        <p style="color: #4b5563; margin-top: 0.5rem;">Fill out the form below to add a new staff member to your account.</p>
     </div>
+
+    <!-- Form -->
+    <div style="background-color: #fff; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem;">
+        <form method="POST" action="{{ route('users.store') }}">
+            @csrf
+            
+            <div style="margin-bottom: 1rem;">
+                <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Full Name</label>
+                <input type="text" name="name" id="name" value="{{ old('name') }}" required
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                @error('name')
+                    <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #ef4444;">{{ $message }}</p>
+                @enderror
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label for="email" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Email Address</label>
+                <input type="email" name="email" id="email" value="{{ old('email') }}" required
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                @error('email')
+                    <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #ef4444;">{{ $message }}</p>
+                @enderror
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label for="password" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Password</label>
+                <input type="password" name="password" id="password" required
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                @error('password')
+                    <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #ef4444;">{{ $message }}</p>
+                @enderror
+                <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #6b7280;">Password must be at least 8 characters long.</p>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label for="password_confirmation" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Confirm Password</label>
+                <input type="password" name="password_confirmation" id="password_confirmation" required
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label for="role" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Role</label>
+                <select id="role" name="role" required
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                    <option value="staff" {{ old('role') === 'staff' ? 'selected' : '' }}>Staff</option>
+                </select>
+                @error('role')
+                    <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #ef4444;">{{ $message }}</p>
+                @enderror
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+                <a href="{{ route('users.index') }}" 
+                   style="display: inline-block; padding: 0.5rem 1rem; background-color: #6b7280; color: #fff; border-radius: 0.375rem; text-decoration: none; font-size: 0.875rem;"
+                   onmouseover="this.style.backgroundColor='#4b5563'" onmouseout="this.style.backgroundColor='#6b7280'">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        style="display: inline-block; padding: 0.5rem 1rem; background-color: #16a34a; color: #fff; border: none; border-radius: 0.375rem; text-decoration: none; font-size: 0.875rem; cursor: pointer;"
+                        onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='#16a34a'">
+                    Add Staff Member
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection

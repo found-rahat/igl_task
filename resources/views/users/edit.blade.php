@@ -3,75 +3,74 @@
 @section('title', 'Edit Staff Member')
 
 @section('content')
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="bg-white shadow sm:rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Staff Member</h3>
-            <div class="mt-2 max-w-xl text-sm text-gray-500">
-                <p>Update the information for this staff member below.</p>
+<div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 0 1.5rem;">
+
+    <!-- Header -->
+    <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937;">Edit Staff Member</h2>
+        <p style="color: #4b5563; margin-top: 0.5rem;">Update the information for this staff member below.</p>
+    </div>
+
+    <!-- Form -->
+    <div style="background-color: #fff; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem;">
+        <form method="POST" action="{{ route('users.update', $user) }}">
+            @csrf
+            @method('PUT')
+            
+            <div style="margin-bottom: 1rem;">
+                <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Full Name</label>
+                <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" required
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                @error('name')
+                    <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #ef4444;">{{ $message }}</p>
+                @enderror
             </div>
             
-            <form method="POST" action="{{ route('users.update', $user) }}" class="mt-5 space-y-6">
-                @csrf
-                @method('PUT')
-                
-                <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                    <div class="sm:col-span-6">
-                        <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                        <div class="mt-1">
-                            <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" required class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                            @error('name')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                    
-                    <div class="sm:col-span-6">
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                        <div class="mt-1">
-                            <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" required class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                            @error('email')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                    
-                    <div class="sm:col-span-6">
-                        <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-                        <div class="mt-1">
-                            <select id="role" name="role" required class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                <option value="staff" {{ old('role', $user->role) === 'staff' ? 'selected' : '' }}>Staff</option>
-                            </select>
-                            @error('role')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                    
-                    <div class="sm:col-span-6">
-                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                        <div class="mt-1">
-                            <select id="status" name="status" required class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                <option value="active" {{ old('status', $user->status) === 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ old('status', $user->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                            @error('status')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end">
-                    <a href="{{ route('users.index') }}" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Cancel
-                    </a>
-                    <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Update Staff Member
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div style="margin-bottom: 1rem;">
+                <label for="email" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Email Address</label>
+                <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" required
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                @error('email')
+                    <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #ef4444;">{{ $message }}</p>
+                @enderror
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label for="role" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Role</label>
+                <select id="role" name="role" required
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                    <option value="staff" {{ old('role', $user->role) === 'staff' ? 'selected' : '' }}>Staff</option>
+                </select>
+                @error('role')
+                    <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #ef4444;">{{ $message }}</p>
+                @enderror
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label for="status" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Status</label>
+                <select id="status" name="status" required
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                    <option value="active" {{ old('status', $user->status) === 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ old('status', $user->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                </select>
+                @error('status')
+                    <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #ef4444;">{{ $message }}</p>
+                @enderror
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+                <a href="{{ route('users.index') }}" 
+                   style="display: inline-block; padding: 0.5rem 1rem; background-color: #6b7280; color: #fff; border-radius: 0.375rem; text-decoration: none; font-size: 0.875rem;"
+                   onmouseover="this.style.backgroundColor='#4b5563'" onmouseout="this.style.backgroundColor='#6b7280'">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        style="display: inline-block; padding: 0.5rem 1rem; background-color: #16a34a; color: #fff; border: none; border-radius: 0.375rem; text-decoration: none; font-size: 0.875rem; cursor: pointer;"
+                        onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='#16a34a'">
+                    Update Staff Member
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

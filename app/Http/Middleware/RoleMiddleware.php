@@ -22,6 +22,12 @@ class RoleMiddleware
 
         $user = Auth::user();
 
+        // Check if user is active
+        if ($user->status !== 'active') {
+            Auth::logout(); // Log the user out
+            return redirect('/login')->with('error', 'Your account is inactive. Please contact administrator.');
+        }
+
         if (!in_array($user->role, $roles)) {
             abort(403, 'Unauthorized access.');
         }
