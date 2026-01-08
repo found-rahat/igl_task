@@ -71,7 +71,6 @@
                             <p>Default accounts:</p>
                             <p>Admin: admin@example.com / password</p>
                             <p>Staff: staff@example.com / password</p>
-                            <p>Candidate: candidate@example.com / password</p>
                         </div>
                     </div>
                 </main>

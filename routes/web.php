@@ -21,8 +21,6 @@ Route::middleware('auth')->group(function () {
                 return redirect()->route('admin.dashboard');
             case 'staff':
                 return redirect()->route('staff.dashboard');
-            case 'candidate':
-                return redirect()->route('candidate.dashboard');
             default:
                 return redirect()->route('login');
         }
@@ -78,12 +76,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/candidates/import', [CandidateController::class, 'import'])->name('candidates.import');
     });
 
-    // Candidate routes
-    Route::middleware('role:admin,staff,candidate')->group(function () {
-        Route::get('/candidate/dashboard', function () {
-            return view('candidate.dashboard');
-        })->name('candidate.dashboard');
-    });
 });
 
 // Public candidate search route (no authentication required) - should be outside the auth middleware

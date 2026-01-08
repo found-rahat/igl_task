@@ -30,12 +30,5 @@ class UserSeeder extends Seeder
             'role' => 'staff',
         ]);
 
-        // Create candidate user
-        User::create([
-            'name' => 'Candidate User',
-            'email' => 'candidate@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'candidate',
-        ]);
     }
 }

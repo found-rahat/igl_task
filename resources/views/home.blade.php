@@ -231,14 +231,14 @@
                     journey.</p>
             </div>
 
-            <div class="service-card" onclick="window.location.href='{{ route('candidates.index') }}'">
-                <h3>All Candidates</h3>
-                <p>View all candidates in our system. Track applications and monitor the recruitment pipeline.</p>
+            <div class="service-card" onclick="window.location.href='{{ route('candidate.search.form') }}'">
+                <h3>Application Status</h3>
+                <p>Check the status of your application using your phone number. Get real-time updates.</p>
             </div>
 
-            <div class="service-card" onclick="window.location.href='{{ route('candidates.hired') }}'">
-                <h3>Hired Candidates</h3>
-                <p>See our successful hires and celebrate the achievements of our new team members.</p>
+            <div class="service-card" onclick="window.location.href='{{ route('candidate.search.form') }}'">
+                <h3>Job Opportunities</h3>
+                <p>Explore current job openings and apply for positions that match your skills.</p>
             </div>
         </section>
 

@@ -5,7 +5,7 @@ A comprehensive Laravel application for managing job candidate applications with
 ## Features
 
 - **Excel File Processing**: Import candidate data from Excel files
-- **Role-Based Access Control**: Admin, Staff, and Candidate roles
+- **Role-Based Access Control**: Admin and Staff roles
 - **Candidate Management**: Full CRUD operations for candidates
 - **Interview Scheduling**: Schedule and manage interviews
 - **Status Tracking**: Track candidate status (pending, hired, rejected, etc.)
@@ -71,7 +71,6 @@ The system comes with three default users:
 
 - **Admin**: admin@example.com / password
 - **Staff**: staff@example.com / password
-- **Candidate**: candidate@example.com / password
 
 ## Excel File Format
 

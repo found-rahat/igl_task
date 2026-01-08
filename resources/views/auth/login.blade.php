@@ -57,7 +57,6 @@
                 <p class="text-gray-600 text-sm">
                     Admin: admin@example.com / password<br>
                     Staff: staff@example.com / password<br>
-                    Candidate: candidate@example.com / password
                 </p>
             </div>
         </div>
